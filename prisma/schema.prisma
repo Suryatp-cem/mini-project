@@ -13,18 +13,39 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String         @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean        @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          String?        @default("student")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
+  applications  Application[]
+  announcements Announcement[]
+  auditLogs     AuditLog[]
 
   @@unique([email])
   @@map("user")
+}
+
+model Application {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  duration  String
+  status    String   @default("pending") // pending, approved, rejected
+  priority  String   @default("normal") // low, normal, high
+  reason    String?
+  comment   String?
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("application")
 }
 
 model Session {
@@ -73,4 +94,28 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  priority  String   @default("normal") // low, normal, urgent
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("announcement")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("audit_log")
 }

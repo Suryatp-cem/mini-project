@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { authClient } from "@/lib/auth-client";
@@ -12,6 +12,8 @@ import { FaUser, FaEnvelope, FaLock, FaArrowRight, FaGoogle } from 'react-icons/
 
 export default function SignUpPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role') || 'student';
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -51,13 +53,14 @@ export default function SignUpPage() {
         email: formData.email,
         password: formData.password,
         name: formData.name,
-        callbackURL: "/dashboard"
-      }, {
+        callbackURL: role === 'admin' ? "/admin/dashboard" : role === 'faculty' ? "/faculty/dashboard" : "/dashboard",
+        role: role as any,
+      } as any, {
         onRequest: () => {
           setIsLoading(true);
         },
         onSuccess: () => {
-          router.push('/verify-email'); // You'll need to create this page
+          router.push('/dashboard');
         },
         onError: (ctx) => {
           setError(ctx.error?.message || 'An error occurred during sign up');
@@ -200,37 +203,12 @@ export default function SignUpPage() {
                   </>
                 )}
               </Button>
-
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full flex items-center justify-center"
-                onClick={() => {
-                  // Handle Google sign up
-                  authClient.signIn.social({
-                    provider: 'google',
-                    callbackURL: '/dashboard'
-                  });
-                }}
-              >
-                <FaGoogle className="h-4 w-4 mr-2 text-red-500" />
-                Sign up with Google
-              </Button>
             </CardContent>
 
             <CardFooter className="flex flex-col space-y-4">
               <p className="text-sm text-center text-gray-600">
                 Already have an account?{' '}
-                <Link href="/sign-in" className="text-blue-600 hover:text-blue-800 font-medium">
+                <Link href={`/sign-in${role ? `?role=${role}` : ''}`} className="text-blue-600 hover:text-blue-800 font-medium">
                   Sign in
                 </Link>
               </p>

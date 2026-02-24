@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { authClient } from "@/lib/auth-client";
@@ -12,6 +12,8 @@ import { FaEnvelope, FaLock, FaArrowRight, FaGoogle } from 'react-icons/fa';
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -19,6 +21,17 @@ export default function SignInPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const { data: session, isPending } = authClient.useSession();
+  const userRole = (session?.user as any)?.role || "student";
+
+  useEffect(() => {
+    if (!isPending && session) {
+      if (userRole === "admin") router.push("/admin/dashboard");
+      else if (userRole === "faculty") router.push("/faculty/dashboard");
+      else router.push("/dashboard");
+    }
+  }, [session, isPending, userRole, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -31,14 +44,14 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (!formData.email || !formData.password) {
       setError('Please enter both email and password');
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       const { data, error } = await authClient.signIn.email({
         email: formData.email,
@@ -86,7 +99,7 @@ export default function SignInPage() {
               Sign in to your account to continue
             </CardDescription>
           </CardHeader>
-          
+
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               {error && (
@@ -94,7 +107,7 @@ export default function SignInPage() {
                   {error}
                 </div>
               )}
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700" htmlFor="email">
                   Email
@@ -115,7 +128,7 @@ export default function SignInPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-gray-700" htmlFor="password">
@@ -141,7 +154,7 @@ export default function SignInPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
@@ -157,9 +170,9 @@ export default function SignInPage() {
                   </label>
                 </div>
               </div>
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={isLoading}
               >
@@ -170,36 +183,12 @@ export default function SignInPage() {
                   </>
                 )}
               </Button>
-              
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full flex items-center justify-center"
-                onClick={() => {
-                  // Handle Google sign in
-                  authClient.signIn.google({
-                    callbackURL: '/dashboard'
-                  });
-                }}
-              >
-                <FaGoogle className="h-4 w-4 mr-2 text-red-500" />
-                Sign in with Google
-              </Button>
             </CardContent>
-            
+
             <CardFooter className="flex flex-col space-y-4">
               <p className="text-sm text-center text-gray-600">
                 Don't have an account?{' '}
-                <Link href="/sign-up" className="text-blue-600 hover:text-blue-800 font-medium">
+                <Link href={`/sign-up${role ? `?role=${role}` : ''}`} className="text-blue-600 hover:text-blue-800 font-medium">
                   Sign up
                 </Link>
               </p>

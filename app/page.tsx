@@ -11,7 +11,7 @@ export default function Home() {
 
         <div className="flex justify-between mt-[30px] gap-[15px]">
           <Link
-            href="/sign-in?role=student"
+            href="/sign-up?role=student"
             className="bg-white p-[25px] w-[150px] rounded-xl text-black no-underline transition-all duration-300 hover:-translate-y-[10px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)] flex flex-col items-center"
           >
             <div className="text-[45px] mb-2">👨‍🎓</div>
@@ -19,7 +19,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/sign-in?role=faculty"
+            href="/sign-up?role=faculty"
             className="bg-white p-[25px] w-[150px] rounded-xl text-black no-underline transition-all duration-300 hover:-translate-y-[10px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)] flex flex-col items-center"
           >
             <div className="text-[45px] mb-2">👩‍🏫</div>
@@ -27,7 +27,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/sign-in?role=admin"
+            href="/sign-up?role=admin"
             className="bg-white p-[25px] w-[150px] rounded-xl text-black no-underline transition-all duration-300 hover:-translate-y-[10px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)] flex flex-col items-center"
           >
             <div className="text-[45px] mb-2">👨‍💼</div>

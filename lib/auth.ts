@@ -1,13 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@prisma/client'
-import "dotenv/config";
-// If your Prisma file is located elsewhere, you can change the path
-
-const connectionString = `${process.env.DATABASE_URL}`
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
+import { prisma } from "./prisma";
 
 
 export const auth = betterAuth({
@@ -18,6 +11,16 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         autoSignIn: false
+    },
+    user: {
+        additionalFields: {
+            role: {
+                type: "string",
+                required: false,
+                defaultValue: "student",
+                input: true, // Allow setting role during sign up for initialization/testing
+            }
+        }
     },
     socialProviders: {
         google: {
